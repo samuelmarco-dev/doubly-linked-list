@@ -25,7 +25,7 @@ int length(list *l);
 int indexOf(list *l, int value);
 void delNodeByIndex(list *l, int index);
 void delNodeByValue(list *l, int value);
-void showList(list *l);
+void showList(list *l, int order);
 int isIndexInvalid(list *l, int index);
 int isListEmpty(list *l);
 
@@ -37,8 +37,12 @@ int main() {
     for (int i = 0; i < LENGTH; i++) {
         addNode(l, rand() % LIMIT, i);
     }
-    showList(l);
+    showList(l, 1);
 
+    delNodeByIndex(l, 0);
+    delNodeByIndex(l, 2);
+
+    showList(l, 1);
     return 0;
 }
 
@@ -63,7 +67,7 @@ void addNode(list *l, int value, int index) {
     node *n = newNode(value);
 
     if(isIndexInvalid(l, index)) {
-        printf("The index passed does not exist in the list and cannot be created");
+        printf("The index passed does not exist in the list and cannot be created!\n");
         exit(1);
     }
     if(isListEmpty(l)) {
@@ -113,23 +117,87 @@ int length(list *l) {
     return size;
 }
 
-int indexOf(list *l, int value) {}
-
-void delNodeByIndex(list *l, int index) {}
-
-void delNodeByValue(list *l, int value) {}
-
-void showList(list *l) {
+int indexOf(list *l, int value) {
+    int index = 0;
     node *n = l->head;
+
     if(isListEmpty(l)) {
-        printf("Cannot show elements of an empty list");
+        printf("Cannot find index in an empty list!\n");
+        return -1;
+    }
+
+    while (n != NULL) {
+        if(n->info == value) return index;
+        index++;
+        n = n->next;
+    }
+
+    return -1;
+}
+
+void delNodeByIndex(list *l, int index) {
+    node *n;
+
+    if(index < 0 || index >= length(l)) {
+        printf("The index passed does not exist in the list!\n");
+        return;
+    }
+    if(isListEmpty(l)) {
+        printf("Unable to delete an element from an empty list!\n");
         return;
     }
 
+    if(index == 0) {
+        n = l->head;
+        l->head = n->next;
+        if(l->head != NULL) {
+            l->head->prev = NULL;
+        } else {
+            l->tail = NULL;
+        }
+    } else if(index == length(l) - 1) {
+        n = l->tail;
+        l->tail = n->prev;
+        l->tail->next = NULL;
+    } else {
+        n = getNode(l, index);
+        if(n == NULL) return;
+        n->prev->next = n->next;
+        n->next->prev = n->prev;
+    }
+
+    free(n);
+}
+
+void delNodeByValue(list *l, int value) {
+    int indexNode = indexOf(l, value);
+
+    while (indexNode != -1) {
+        delNodeByIndex(l, indexNode);
+        indexNode = indexOf(l, value);
+    }
+}
+
+void showList(list *l, int order) {
+    node *n;
+    if(isListEmpty(l)) {
+        printf("Cannot show elements of an empty list!\n");
+        return;
+    }
     printf("Show list:\n-> ");
-    while (n != NULL) {
-        printf("%d ", n->info);
-        n = n->next;
+
+    if(order != 0) {
+        n = l->head;
+        while (n != NULL) {
+            printf("%d ", n->info);
+            n = n->next;
+        }
+    } else {
+        n = l->tail;
+        while (n != NULL) {
+            printf("%d ", n->info);
+            n = n->prev;
+        }
     }
     printf("\n");
 }
