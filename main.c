@@ -25,6 +25,10 @@ int length(list *l);
 int indexOf(list *l, int value);
 void delNodeByIndex(list *l, int index);
 void delNodeByValue(list *l, int value);
+
+void removeMultiples(list *l, int multiple);
+void addAverageValue(list *l);
+
 void showList(list *l, int order);
 int isIndexInvalid(list *l, int index);
 int isListEmpty(list *l);
@@ -37,10 +41,6 @@ int main() {
     for (int i = 0; i < LENGTH; i++) {
         addNode(l, rand() % LIMIT, i);
     }
-    showList(l, 1);
-
-    delNodeByIndex(l, 0);
-    delNodeByIndex(l, 2);
 
     showList(l, 1);
     return 0;
@@ -103,6 +103,29 @@ node *getNode(list *l, int index) {
     }
 
     return n;
+}
+
+void addAverageValue(list *l) {
+    node *new, *next;
+    node *aux = l->head;
+
+    if(isListEmpty(l) || length(l) < 2) {
+        printf("It is not possible to enter the middle");
+        return;
+    }
+
+    while (aux != NULL) {
+        if(aux->next != NULL && aux->next->prev != NULL) {
+            next = aux->next;
+            new = newNode((aux->info + next->info)/2);
+
+            new->prev = aux;
+            new->next = next;
+            next->prev = new;
+            aux->next = new;
+        }
+        aux = aux->next;
+    }
 }
 
 int length(list *l) {
@@ -175,6 +198,25 @@ void delNodeByValue(list *l, int value) {
     while (indexNode != -1) {
         delNodeByIndex(l, indexNode);
         indexNode = indexOf(l, value);
+    }
+}
+
+void removeMultiples(list *l, int multiple) {
+    printf("\nList in removeMultiples:\n");
+    showList(l, 1);
+    node *n = l->head;
+    int index;
+
+    if(isListEmpty(l)) {
+        printf("Unable to delete an multiples from an empty list!\n");
+        return;
+    }
+
+    while(n != NULL) {
+        if(n->info % multiple == 0) {
+            delNodeByValue(l, n->info);
+        }
+        n = n->next;
     }
 }
 
